@@ -1,0 +1,6 @@
+company_name=Acme Software Pvt Ltd
+month=May
+year=2026
+payment_date=2026-05-31
+currency=INR
+address=42 Business Park, Bengaluru
