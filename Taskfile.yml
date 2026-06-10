@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  test:
+    cmds:
+      - go test -tags ci ./...
+
+  build:
+    cmds:
+      - sh scripts/build.sh
+
+  build-cli:
+    cmds:
+      - go build -o dist/typemerge ./cmd/typemerge
+
+  run:
+    cmds:
+      - go run ./cmd/typemerge -formats ""
+
+  fmt:
+    cmds:
+      - gofmt -w cmd internal pkg

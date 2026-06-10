@@ -1,82 +1,47 @@
-# receipt-generator
+# typemerge
 
-A small Go CLI that renders employee salary-slip `.typ` files from:
+`typemerge` renders one Typst document per CSV row using a Go template and
+shared `key=value` metadata. It can keep the rendered `.typ` files or invoke
+Typst to produce PDF, PNG, and SVG output.
 
-- a Typst template
-- an employee CSV
-- a `metadata.txt` file for month, company name, payment date, etc.
+## Quick start
 
-It can also call `typst compile` for every rendered `.typ` file to produce PDFs.
-
-## Usage
-
-Install Typst first if you want PDF compilation:
+Generate the bundled salary slips as `.typ` files:
 
 ```bash
-typst.exe --version
+go run ./cmd/typemerge -formats ""
 ```
 
-Generate `.typ` files and PDFs:
+Generate PDFs (requires `typst` on `PATH`):
 
 ```bash
-go run ./cmd/receipt-generator \
-  -template examples/salary-slip-template.typ \
-  -csv examples/employees.csv \
-  -metadata examples/metadata.txt \
-  -out out \
-  -typst typst.exe
+go run ./cmd/typemerge
 ```
 
-Generate only `.typ` files:
+Launch the desktop GUI:
 
 ```bash
-go run ./cmd/receipt-generator -compile=false
+go run ./cmd/typemerge-gui
 ```
 
-Outputs are written to:
+Linux GUI builds require Fyne's OpenGL/X11 development dependencies.
 
-- `out/typ/*.typ`
-- `out/pdf/*.pdf` when `-compile=true`
+Generated files are written below `out/`.
 
-## CSV format
+## Inputs
 
-The first row must contain column names. Each later row creates one salary slip.
+- `-template`: Typst file containing Go template expressions
+- `-csv`: tabular data; each row creates one document
+- `-metadata`: shared `key=value` data
+- `-formats`: comma-separated `pdf`, `png`, or `svg`; empty means `.typ` only
+- `-typst`: Typst executable name or path, including a WSL path to `typst.exe`
+- `-out`: output root
 
-Example:
+See [docs/usage.md](docs/usage.md), [docs/templates.md](docs/templates.md), and
+[docs/metadata.md](docs/metadata.md) for details.
 
-```csv
-employee_id,name,designation,basic,hra,allowances,deductions,net_pay
-EMP001,Asha Rao,Software Engineer,70000,28000,12000,5000,105000
-```
+## Architecture
 
-## metadata.txt format
-
-Use `key=value` lines:
-
-```text
-company_name=Acme Software Pvt Ltd
-month=May
-year=2026
-payment_date=2026-05-31
-currency=INR
-```
-
-Blank lines and lines beginning with `#` are ignored.
-
-## Template placeholders
-
-The template is a normal Typst file with Go template placeholders.
-
-Use employee CSV fields:
-
-```gotemplate
-{{ get .Employee "name" }}
-{{ get .Employee "net_pay" }}
-```
-
-Use metadata fields:
-
-```gotemplate
-{{ get .Meta "company_name" }}
-{{ get .Meta "month" }}
-```
+Both executable frontends call `internal/app.Service`. Parsing, rendering,
+naming, filesystem output, and Typst compilation are isolated in their own
+packages. The supported library entrypoint is `pkg/typemerge`.
