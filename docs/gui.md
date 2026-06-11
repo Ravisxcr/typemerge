@@ -34,3 +34,10 @@ The GUI provides file and output-directory pickers, compiled-format controls,
 generation status, and an output summary. It is a thin frontend over
 `internal/app.Service`; parsing, rendering, naming, and Typst compilation remain
 in the shared core.
+
+The desktop workspace supports multiple folder-based projects. Opening a folder
+detects the first Typst and CSV files plus `metadata.txt` or `meta.txt`, and
+defaults generated files to that project's `output` folder. Project settings
+are retained locally between launches. Native file pickers initially open in
+the user's Documents directory (or home directory when Documents is
+unavailable).

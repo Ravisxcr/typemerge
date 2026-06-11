@@ -1,6 +1,9 @@
 package gui
 
 import (
+	"os"
+	"path/filepath"
+
 	"typemerge/internal/app"
 	"typemerge/internal/typst"
 )
@@ -16,16 +19,43 @@ type State struct {
 	SVG          bool   `json:"svg"`
 }
 
+type ProjectSetup struct {
+	Directory    string `json:"directory"`
+	Name         string `json:"name"`
+	TemplatePath string `json:"templatePath"`
+	CSVPath      string `json:"csvPath"`
+	MetadataPath string `json:"metadataPath"`
+	OutputDir    string `json:"outputDir"`
+}
+
 func NewState() State {
 	defaults := app.DefaultOptions()
 	return State{
-		TemplatePath: defaults.TemplatePath,
-		CSVPath:      defaults.CSVPath,
-		MetadataPath: defaults.MetadataPath,
-		OutputDir:    defaults.OutputDir,
-		TypstBinary:  defaults.TypstBinary,
-		PDF:          true,
+		OutputDir:   defaultOutputDir(),
+		TypstBinary: defaults.TypstBinary,
+		PDF:         true,
 	}
+}
+
+func defaultOutputDir() string {
+	return filepath.Join(defaultDialogDirectory(), "output")
+}
+
+func defaultDialogDirectory() string {
+	home, err := os.UserHomeDir()
+	if err == nil && home != "" {
+		documents := filepath.Join(home, "Documents")
+		if info, statErr := os.Stat(documents); statErr == nil && info.IsDir() {
+			return documents
+		}
+		return home
+	}
+
+	workingDir, err := os.Getwd()
+	if err == nil && workingDir != "" {
+		return workingDir
+	}
+	return "."
 }
 
 func (s State) Options() app.Options {

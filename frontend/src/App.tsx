@@ -1,29 +1,23 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import {
-  CheckCircle2Icon,
-  ChevronRightIcon,
+  CheckIcon,
+  ChevronDownIcon,
   CircleIcon,
   FileCode2Icon,
   FileSpreadsheetIcon,
   FileTextIcon,
+  FolderIcon,
   FolderOpenIcon,
-  Layers3Icon,
   LoaderCircleIcon,
+  MoreHorizontalIcon,
+  PanelLeftIcon,
   PlayIcon,
-  ScrollTextIcon,
+  PlusIcon,
   Settings2Icon,
-  SparklesIcon,
-  TerminalSquareIcon,
+  XIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,10 +27,31 @@ import {
   Generate,
   SelectFile,
   SelectOutputDirectory,
+  SelectProjectDirectory,
+  UseTemplatePreset,
 } from "../wailsjs/go/gui/App"
 import type { app, gui } from "../wailsjs/go/models"
 
-const emptyState: gui.State = {
+type Format = "pdf" | "png" | "svg"
+type PathField = "templatePath" | "csvPath" | "metadataPath" | "outputDir"
+type TemplatePreset = "project" | "salary" | "invoice" | "custom"
+
+type Project = {
+  id: string
+  name: string
+  directory: string
+  preset: TemplatePreset
+  state: gui.State
+}
+
+const storageKey = "typemerge.projects.v1"
+const formats: Array<{ id: Format; label: string }> = [
+  { id: "pdf", label: "PDF" },
+  { id: "png", label: "PNG" },
+  { id: "svg", label: "SVG" },
+]
+
+const blankState: gui.State = {
   templatePath: "",
   csvPath: "",
   metadataPath: "",
@@ -47,55 +62,9 @@ const emptyState: gui.State = {
   svg: false,
 }
 
-type PathField = "templatePath" | "csvPath" | "metadataPath" | "outputDir"
-type FileKind = "template" | "csv" | "metadata"
-type Format = "pdf" | "png" | "svg"
-
-const fileFields: Array<{
-  field: Exclude<PathField, "outputDir">
-  kind: FileKind
-  label: string
-  description: string
-  placeholder: string
-  icon: typeof FileTextIcon
-  optional?: boolean
-}> = [
-  {
-    field: "templatePath",
-    kind: "template",
-    label: "Typst template",
-    description: "The document layout used for every row",
-    placeholder: "Choose a .typ template",
-    icon: FileCode2Icon,
-  },
-  {
-    field: "csvPath",
-    kind: "csv",
-    label: "CSV data",
-    description: "Each row becomes a generated document",
-    placeholder: "Choose a .csv data file",
-    icon: FileSpreadsheetIcon,
-  },
-  {
-    field: "metadataPath",
-    kind: "metadata",
-    label: "Shared metadata",
-    description: "Key-value data available to every document",
-    placeholder: "Choose a metadata file",
-    icon: ScrollTextIcon,
-    optional: true,
-  },
-]
-
-const formats: Array<{
-  id: Format
-  label: string
-  description: string
-}> = [
-  { id: "pdf", label: "PDF", description: "Ready to share" },
-  { id: "png", label: "PNG", description: "Raster image" },
-  { id: "svg", label: "SVG", description: "Vector graphic" },
-]
+function newID() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error)
@@ -105,40 +74,140 @@ function fileName(path: string) {
   return path.split(/[\\/]/).pop() || path
 }
 
+function pathIn(directory: string, name: string) {
+  if (!directory) return name
+  const separator = directory.includes("\\") ? "\\" : "/"
+  return `${directory.replace(/[\\/]$/, "")}${separator}${name}`
+}
+
 function App() {
-  const [form, setForm] = useState<gui.State>(emptyState)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [activeID, setActiveID] = useState("")
   const [files, setFiles] = useState<app.GeneratedFile[]>([])
-  const [log, setLog] = useState("Ready when you are.")
-  const [loading, setLoading] = useState(true)
+  const [log, setLog] = useState("Choose a project folder to begin.")
   const [generating, setGenerating] = useState(false)
+  const [inspectorOpen, setInspectorOpen] = useState(true)
 
   useEffect(() => {
+    const stored = localStorage.getItem(storageKey)
+    if (stored) {
+      try {
+        const restored = JSON.parse(stored) as Project[]
+        if (restored.length) {
+          setProjects(restored)
+          setActiveID(restored[0].id)
+          return
+        }
+      } catch {
+        localStorage.removeItem(storageKey)
+      }
+    }
+
     DefaultState()
-      .then(setForm)
+      .then((state) => {
+        const project = {
+          id: newID(),
+          name: "Untitled project",
+          directory: "",
+          preset: "project" as const,
+          state,
+        }
+        setProjects([project])
+        setActiveID(project.id)
+      })
       .catch((error: unknown) => setLog(`Error: ${errorMessage(error)}`))
-      .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    if (projects.length) {
+      localStorage.setItem(storageKey, JSON.stringify(projects))
+    }
+  }, [projects])
+
+  const active = projects.find(({ id }) => id === activeID) ?? projects[0]
   const selectedFormats = useMemo(
-    () => formats.filter(({ id }) => form[id]),
-    [form],
+    () => formats.filter(({ id }) => active?.state[id]),
+    [active],
+  )
+  const ready = Boolean(
+    active?.state.templatePath &&
+      active.state.csvPath &&
+      active.state.metadataPath &&
+      active.state.outputDir &&
+      selectedFormats.length,
   )
 
-  const requiredInputsReady = Boolean(
-    form.templatePath && form.csvPath && form.outputDir,
-  )
-
-  const updatePath = (field: PathField, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }))
+  const updateProject = (change: (project: Project) => Project) => {
+    setProjects((current) =>
+      current.map((project) => (project.id === active?.id ? change(project) : project)),
+    )
   }
 
-  const selectFile = async (
+  const updateState = (field: keyof gui.State, value: string | boolean) => {
+    updateProject((project) => ({
+      ...project,
+      state: { ...project.state, [field]: value },
+    }))
+  }
+
+  const openProject = async () => {
+    try {
+      const setup = await SelectProjectDirectory()
+      if (!setup.directory) return
+      const state = await DefaultState()
+      const project: Project = {
+        id: newID(),
+        name: setup.name || "Untitled project",
+        directory: setup.directory,
+        preset: "project",
+        state: {
+          ...state,
+          templatePath: setup.templatePath,
+          csvPath: setup.csvPath,
+          metadataPath: setup.metadataPath,
+          outputDir: setup.outputDir,
+        },
+      }
+      setProjects((current) => [
+        ...current.filter((item) => item.directory || item.name !== "Untitled project"),
+        project,
+      ])
+      setActiveID(project.id)
+      setFiles([])
+      setLog(`Opened ${setup.directory}`)
+    } catch (error) {
+      setLog(`Error: ${errorMessage(error)}`)
+    }
+  }
+
+  const addBlankProject = async () => {
+    const state = await DefaultState().catch(() => ({ ...blankState }))
+    const project: Project = {
+      id: newID(),
+      name: `Untitled ${projects.length + 1}`,
+      directory: "",
+      preset: "project",
+      state,
+    }
+    setProjects((current) => [...current, project])
+    setActiveID(project.id)
+  }
+
+  const removeProject = (id: string) => {
+    setProjects((current) => {
+      const next = current.filter((project) => project.id !== id)
+      setActiveID((selected) => (selected === id ? (next[0]?.id ?? "") : selected))
+      return next
+    })
+  }
+
+  const selectPath = async (
     field: Exclude<PathField, "outputDir">,
-    kind: FileKind,
+    kind: "template" | "csv" | "metadata",
   ) => {
     try {
       const path = await SelectFile(kind)
-      if (path) updatePath(field, path)
+      if (path) updateState(field, path)
     } catch (error) {
       setLog(`Error: ${errorMessage(error)}`)
     }
@@ -147,24 +216,58 @@ function App() {
   const selectOutput = async () => {
     try {
       const path = await SelectOutputDirectory()
-      if (path) updatePath("outputDir", path)
+      if (path) updateState("outputDir", path)
     } catch (error) {
       setLog(`Error: ${errorMessage(error)}`)
     }
   }
 
-  const generate = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setGenerating(true)
-    setLog("Generating documents...")
+  const selectPreset = async (preset: TemplatePreset) => {
+    if (!active) return
+    if (preset === "custom") {
+      const path = await SelectFile("template")
+      if (!path) return
+      updateProject((project) => ({
+        ...project,
+        preset,
+        state: { ...project.state, templatePath: path },
+      }))
+      return
+    }
+    if (preset !== "project") {
+      try {
+        const path = await UseTemplatePreset(active.directory, preset)
+        updateProject((project) => ({
+          ...project,
+          preset,
+          state: { ...project.state, templatePath: path },
+        }))
+      } catch (error) {
+        setLog(`Error: ${errorMessage(error)}`)
+      }
+      return
+    }
+    updateProject((project) => ({
+      ...project,
+      preset,
+      state: {
+        ...project.state,
+        templatePath: pathIn(project.directory, "template.typ"),
+      },
+    }))
+  }
 
+  const generate = async () => {
+    if (!active) return
+    setGenerating(true)
+    setLog(`Rendering ${active.name}...`)
     try {
-      const result = await Generate(form)
+      const result = await Generate(active.state)
       const generated = result.files ?? []
       setFiles(generated)
       setLog(
         generated.length
-          ? generated.map((file) => `Created  ${file.path}`).join("\n")
+          ? `Complete. Created ${generated.length} files in ${active.state.outputDir}`
           : "No files were generated.",
       )
     } catch (error) {
@@ -175,328 +278,236 @@ function App() {
     }
   }
 
+  if (!active) return <main className="loading-screen">Loading workspace...</main>
+
   return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">
-            <Layers3Icon className="size-5" />
-          </div>
-          <div>
-            <p className="brand-name">typemerge</p>
-            <p className="brand-version">Document studio</p>
-          </div>
+    <main className="studio-shell">
+      <header className="titlebar">
+        <div className="app-brand">
+          <div className="brand-tile">Tm</div>
+          <strong>TypeMerge</strong>
         </div>
-
-        <nav className="sidebar-nav" aria-label="Workspace">
-          <button className="nav-item nav-item-active" type="button">
-            <SparklesIcon className="size-4" />
-            Generate
-          </button>
-          <div className="nav-item nav-item-muted">
-            <Settings2Icon className="size-4" />
-            Configuration
-          </div>
+        <nav className="menu-bar" aria-label="Application menu">
+          <span>File</span><span>Edit</span><span>Project</span><span>View</span><span>Help</span>
         </nav>
-
-        <div className="sidebar-status">
-          <div className="flex items-center gap-2">
-            <span className="status-dot" />
-            <span>Local workspace</span>
-          </div>
-          <p>Your files stay on this device.</p>
+        <div className="titlebar-actions">
+          <button type="button" onClick={() => setInspectorOpen((value) => !value)}>
+            <PanelLeftIcon className="size-4" />
+          </button>
+          <Button size="sm" onClick={generate} disabled={!ready || generating}>
+            {generating ? <LoaderCircleIcon className="size-4 animate-spin" /> : <PlayIcon className="size-4 fill-current" />}
+            Generate
+          </Button>
         </div>
-      </aside>
+      </header>
 
-      <div className="workspace">
-        <header className="workspace-header">
-          <div>
-            <p className="eyebrow">Document generator</p>
-            <h1>Create a new batch</h1>
-            <p className="header-copy">
-              Merge your data into polished, consistent Typst documents.
-            </p>
+      <section className={cn("studio-grid", !inspectorOpen && "inspector-hidden")}>
+        <aside className="project-panel">
+          <div className="panel-heading">
+            <span>Projects</span>
+            <button type="button" title="New project" onClick={addBlankProject}>
+              <PlusIcon className="size-4" />
+            </button>
           </div>
-          <div className="header-badge">
-            <CircleIcon className="size-2 fill-current" />
-            Typst ready
-          </div>
-        </header>
-
-        <form className="workspace-grid" onSubmit={generate}>
-          <div className="main-column">
-            <Card className="panel-card">
-              <CardHeader className="section-heading">
-                <div className="step-number">1</div>
-                <div>
-                  <CardTitle>Source files</CardTitle>
-                  <CardDescription>
-                    Select the template and data for this batch.
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-3">
-                {fileFields.map(
-                  ({
-                    field,
-                    kind,
-                    label,
-                    description,
-                    placeholder,
-                    icon: Icon,
-                    optional,
-                  }) => (
-                    <div className="file-field" key={field}>
-                      <div className="file-icon">
-                        <Icon className="size-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-center gap-2">
-                          <Label htmlFor={field}>{label}</Label>
-                          {optional && (
-                            <span className="optional-tag">Optional</span>
-                          )}
-                        </div>
-                        <p className="field-description">{description}</p>
-                        <Input
-                          className="mt-2"
-                          id={field}
-                          value={form[field]}
-                          placeholder={placeholder}
-                          required={!optional}
-                          onChange={(event) =>
-                            updatePath(field, event.target.value)
-                          }
-                        />
-                      </div>
-                      <Button
-                        className="browse-button"
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => selectFile(field, kind)}
-                      >
-                        Browse
-                      </Button>
-                    </div>
-                  ),
+          <button className="open-project" type="button" onClick={openProject}>
+            <FolderOpenIcon className="size-4" />
+            Open folder
+          </button>
+          <div className="project-list">
+            {projects.map((project) => (
+              <button
+                className={cn("project-item", project.id === active.id && "active")}
+                key={project.id}
+                type="button"
+                onClick={() => setActiveID(project.id)}
+              >
+                <span className="project-icon"><FileCode2Icon className="size-4" /></span>
+                <span className="project-copy">
+                  <strong>{project.name}</strong>
+                  <small>{project.directory || "No folder selected"}</small>
+                </span>
+                {projects.length > 1 && (
+                  <span
+                    className="remove-project"
+                    role="button"
+                    tabIndex={0}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      removeProject(project.id)
+                    }}
+                  >
+                    <XIcon className="size-3" />
+                  </span>
                 )}
-              </CardContent>
-            </Card>
+              </button>
+            ))}
+          </div>
+          <div className="panel-section">
+            <div className="section-label">Project files</div>
+            <FileTreeRow icon={FileCode2Icon} label={fileName(active.state.templatePath) || "Template missing"} ready={Boolean(active.state.templatePath)} />
+            <FileTreeRow icon={FileSpreadsheetIcon} label={fileName(active.state.csvPath) || "CSV missing"} ready={Boolean(active.state.csvPath)} />
+            <FileTreeRow icon={FileTextIcon} label={fileName(active.state.metadataPath) || "Metadata missing"} ready={Boolean(active.state.metadataPath)} />
+            <FileTreeRow icon={FolderIcon} label="output" ready={Boolean(active.state.outputDir)} />
+          </div>
+        </aside>
 
-            <Card className="panel-card">
-              <CardHeader className="section-heading">
-                <div className="step-number">2</div>
-                <div>
-                  <CardTitle>Output settings</CardTitle>
-                  <CardDescription>
-                    Choose where and how your documents are created.
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <div className="grid gap-2">
-                  <Label htmlFor="outputDir">Destination folder</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="outputDir"
-                      value={form.outputDir}
-                      placeholder="Choose an output directory"
-                      required
-                      onChange={(event) =>
-                        updatePath("outputDir", event.target.value)
-                      }
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={selectOutput}
-                    >
-                      <FolderOpenIcon className="size-4" />
-                      Browse
-                    </Button>
-                  </div>
-                </div>
-
-                <fieldset className="grid gap-2.5">
-                  <legend className="mb-2 text-sm font-medium">
-                    Export formats
-                  </legend>
-                  <div className="format-grid">
-                    {formats.map(({ id, label, description }) => (
-                      <Label
-                        className={cn(
-                          "format-option",
-                          form[id] && "format-option-selected",
-                        )}
-                        htmlFor={id}
-                        key={id}
-                      >
-                        <Checkbox
-                          id={id}
-                          checked={form[id]}
-                          onCheckedChange={(checked) =>
-                            setForm((current) => ({
-                              ...current,
-                              [id]: checked === true,
-                            }))
-                          }
-                        />
-                        <span>
-                          <strong>{label}</strong>
-                          <small>{description}</small>
-                        </span>
-                      </Label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="typstBinary">Typst executable</Label>
-                  <div className="relative">
-                    <TerminalSquareIcon className="input-leading-icon" />
-                    <Input
-                      className="pl-10 font-mono"
-                      id="typstBinary"
-                      value={form.typstBinary}
-                      required
-                      onChange={(event) =>
-                        setForm((current) => ({
-                          ...current,
-                          typstBinary: event.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <section className="editor-area">
+          <div className="document-tabs">
+            <div className="document-tab active">
+              <FileCode2Icon className="size-3.5" />
+              {fileName(active.state.templatePath) || "template.typ"}
+              <XIcon className="size-3" />
+            </div>
+            <button type="button"><PlusIcon className="size-4" /></button>
           </div>
 
-          <aside className="run-column">
-            <Card className="run-card">
-              <CardHeader>
-                <CardTitle>Batch summary</CardTitle>
-                <CardDescription>
-                  Review your setup before generating.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-5">
-                <div className="summary-list">
-                  <SummaryRow
-                    label="Template"
-                    value={
-                      form.templatePath
-                        ? fileName(form.templatePath)
-                        : "Not selected"
-                    }
-                    ready={Boolean(form.templatePath)}
-                  />
-                  <SummaryRow
-                    label="Data source"
-                    value={
-                      form.csvPath ? fileName(form.csvPath) : "Not selected"
-                    }
-                    ready={Boolean(form.csvPath)}
-                  />
-                  <SummaryRow
-                    label="Formats"
-                    value={
-                      selectedFormats.map(({ label }) => label).join(", ") ||
-                      "None"
-                    }
-                    ready={selectedFormats.length > 0}
-                  />
-                  <SummaryRow
-                    label="Destination"
-                    value={
-                      form.outputDir ? fileName(form.outputDir) : "Not selected"
-                    }
-                    ready={Boolean(form.outputDir)}
-                  />
+          <div className="canvas">
+            <div className="canvas-toolbar">
+              <span>100%</span><ChevronDownIcon className="size-3" />
+              <i />
+              <span>A4</span>
+              <MoreHorizontalIcon className="size-4" />
+            </div>
+            <div className="page">
+              <div className="page-accent" />
+              <div className="page-header">
+                <div>
+                  <span className="page-kicker">TYPEMERGE DOCUMENT</span>
+                  <h2>{active.name}</h2>
+                  <p>Generated from structured project data</p>
                 </div>
-
-                <Button
-                  className="h-12 w-full"
-                  type="submit"
-                  disabled={
-                    loading ||
-                    generating ||
-                    !requiredInputsReady ||
-                    selectedFormats.length === 0
-                  }
-                >
-                  {generating ? (
-                    <LoaderCircleIcon className="size-4 animate-spin" />
-                  ) : (
-                    <PlayIcon className="size-4 fill-current" />
-                  )}
-                  {generating ? "Generating..." : "Generate documents"}
-                </Button>
-                <p className="run-hint">
-                  One document will be created for each CSV row.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="activity-card">
-              <CardHeader className="pb-0">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <TerminalSquareIcon className="size-4 text-primary" />
-                    Activity
-                  </CardTitle>
-                  {files.length > 0 && (
-                    <span className="success-tag">
-                      {files.length} created
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <pre className="activity-log">{log}</pre>
-                {files.length > 0 && (
-                  <div className="output-list">
-                    {files.slice(0, 3).map((file) => (
-                      <div className="output-file" key={file.path}>
-                        <FileTextIcon className="size-4" />
-                        <span>{fileName(file.path)}</span>
-                        <ChevronRightIcon className="ml-auto size-4" />
-                      </div>
-                    ))}
+                <div className="page-logo">Tm</div>
+              </div>
+              <div className="page-rule" />
+              <div className="preview-grid">
+                <PreviewField label="Template" value={fileName(active.state.templatePath) || "Select a template"} />
+                <PreviewField label="Data source" value={fileName(active.state.csvPath) || "Select CSV data"} />
+                <PreviewField label="Metadata" value={fileName(active.state.metadataPath) || "Select metadata"} />
+                <PreviewField label="Export" value={selectedFormats.map((format) => format.label).join(", ") || "No format"} />
+              </div>
+              <div className="preview-table">
+                <div className="preview-table-head"><span>FIELD</span><span>MERGED VALUE</span></div>
+                {["name", "document_id", "date", "amount"].map((field, index) => (
+                  <div className="preview-table-row" key={field}>
+                    <span>{field}</span><span>{`{{ row.${field} }}`}</span><b>{index + 1}</b>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+              <div className="page-footer">Preview layout · Final content is created from each CSV row</div>
+            </div>
+          </div>
+
+          <div className="activity-strip">
+            <div className="activity-title">
+              <CircleIcon className={cn("size-2 fill-current", files.length ? "success" : "")} />
+              Activity
+            </div>
+            <code>{log}</code>
+            {files.length > 0 && <span>{files.length} files</span>}
+          </div>
+        </section>
+
+        {inspectorOpen && (
+          <aside className="inspector">
+            <div className="inspector-title">
+              <div><Settings2Icon className="size-4" /><span>Properties</span></div>
+              <MoreHorizontalIcon className="size-4" />
+            </div>
+
+            <InspectorSection title="Project">
+              <Label htmlFor="project-name">Name</Label>
+              <Input
+                id="project-name"
+                value={active.name}
+                onChange={(event) => updateProject((project) => ({ ...project, name: event.target.value }))}
+              />
+              <Label>Workspace folder</Label>
+              <PathControl value={active.directory} placeholder="Choose a project folder" onBrowse={openProject} />
+            </InspectorSection>
+
+            <InspectorSection title="Template">
+              <div className="preset-grid">
+                {([
+                  ["project", "Project", "template.typ"],
+                  ["salary", "Salary slip", "salary-slip.typ"],
+                  ["invoice", "Invoice", "invoice.typ"],
+                  ["custom", "Custom", "Choose a file"],
+                ] as const).map(([id, title, copy]) => (
+                  <button
+                    className={cn("preset-card", active.preset === id && "selected")}
+                    key={id}
+                    type="button"
+                    onClick={() => selectPreset(id)}
+                  >
+                    <FileCode2Icon className="size-4" />
+                    <span><strong>{title}</strong><small>{copy}</small></span>
+                    {active.preset === id && <CheckIcon className="check size-3" />}
+                  </button>
+                ))}
+              </div>
+            </InspectorSection>
+
+            <InspectorSection title="Data files">
+              <Label>CSV data</Label>
+              <PathControl value={active.state.csvPath} placeholder="Required .csv file" onBrowse={() => selectPath("csvPath", "csv")} />
+              <Label>Metadata</Label>
+              <PathControl value={active.state.metadataPath} placeholder="Required metadata file" onBrowse={() => selectPath("metadataPath", "metadata")} />
+            </InspectorSection>
+
+            <InspectorSection title="Export">
+              <div className="format-row">
+                {formats.map(({ id, label }) => (
+                  <Label className={cn("format-chip", active.state[id] && "selected")} htmlFor={id} key={id}>
+                    <Checkbox id={id} checked={active.state[id]} onCheckedChange={(checked) => updateState(id, checked === true)} />
+                    {label}
+                  </Label>
+                ))}
+              </div>
+              <Label>Output folder</Label>
+              <PathControl value={active.state.outputDir} placeholder="output" onBrowse={selectOutput} />
+            </InspectorSection>
+
+            <div className="inspector-run">
+              <Button onClick={generate} disabled={!ready || generating}>
+                {generating ? <LoaderCircleIcon className="size-4 animate-spin" /> : <PlayIcon className="size-4 fill-current" />}
+                {generating ? "Generating..." : "Generate documents"}
+              </Button>
+              <small>{ready ? "Project is ready to export" : "Complete the missing project files"}</small>
+            </div>
           </aside>
-        </form>
-      </div>
+        )}
+      </section>
     </main>
   )
 }
 
-function SummaryRow({
-  label,
-  value,
-  ready,
-}: {
-  label: string
-  value: string
-  ready: boolean
-}) {
+function FileTreeRow({ icon: Icon, label, ready }: { icon: typeof FileTextIcon; label: string; ready: boolean }) {
   return (
-    <div className="summary-row">
-      {ready ? (
-        <CheckCircle2Icon className="size-4 shrink-0 text-primary" />
-      ) : (
-        <CircleIcon className="size-4 shrink-0 text-muted-foreground/50" />
-      )}
-      <div className="min-w-0">
-        <span>{label}</span>
-        <strong className={cn(!ready && "text-muted-foreground")}>
-          {value}
-        </strong>
-      </div>
+    <div className={cn("file-tree-row", !ready && "missing")}>
+      <Icon className="size-3.5" /><span>{label}</span>
+      <CircleIcon className={cn("ml-auto size-1.5 fill-current", ready && "ready")} />
+    </div>
+  )
+}
+
+function PreviewField({ label, value }: { label: string; value: string }) {
+  return <div><span>{label}</span><strong>{value}</strong></div>
+}
+
+function InspectorSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="inspector-section">
+      <div className="section-label">{title}</div>
+      {children}
+    </section>
+  )
+}
+
+function PathControl({ value, placeholder, onBrowse }: { value: string; placeholder: string; onBrowse: () => void }) {
+  return (
+    <div className="path-control">
+      <span title={value}>{value ? fileName(value) : placeholder}</span>
+      <button type="button" onClick={onBrowse}><FolderOpenIcon className="size-3.5" /></button>
     </div>
   )
 }
