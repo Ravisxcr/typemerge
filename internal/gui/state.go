@@ -1,61 +1,50 @@
 package gui
 
 import (
-	"fyne.io/fyne/v2/widget"
-
 	"typemerge/internal/app"
 	"typemerge/internal/typst"
 )
 
 type State struct {
-	Template *widget.Entry
-	CSV      *widget.Entry
-	Metadata *widget.Entry
-	Output   *widget.Entry
-	Typst    *widget.Entry
-	PDF      *widget.Check
-	PNG      *widget.Check
-	SVG      *widget.Check
+	TemplatePath string `json:"templatePath"`
+	CSVPath      string `json:"csvPath"`
+	MetadataPath string `json:"metadataPath"`
+	OutputDir    string `json:"outputDir"`
+	TypstBinary  string `json:"typstBinary"`
+	PDF          bool   `json:"pdf"`
+	PNG          bool   `json:"png"`
+	SVG          bool   `json:"svg"`
 }
 
-func NewState() *State {
+func NewState() State {
 	defaults := app.DefaultOptions()
-	state := &State{
-		Template: widget.NewEntry(),
-		CSV:      widget.NewEntry(),
-		Metadata: widget.NewEntry(),
-		Output:   widget.NewEntry(),
-		Typst:    widget.NewEntry(),
-		PDF:      widget.NewCheck("PDF", nil),
-		PNG:      widget.NewCheck("PNG", nil),
-		SVG:      widget.NewCheck("SVG", nil),
+	return State{
+		TemplatePath: defaults.TemplatePath,
+		CSVPath:      defaults.CSVPath,
+		MetadataPath: defaults.MetadataPath,
+		OutputDir:    defaults.OutputDir,
+		TypstBinary:  defaults.TypstBinary,
+		PDF:          true,
 	}
-	state.Template.SetText(defaults.TemplatePath)
-	state.CSV.SetText(defaults.CSVPath)
-	state.Metadata.SetText(defaults.MetadataPath)
-	state.Output.SetText(defaults.OutputDir)
-	state.Typst.SetText(defaults.TypstBinary)
-	state.PDF.SetChecked(true)
-	return state
 }
 
-func (s *State) Options() app.Options {
+func (s State) Options() app.Options {
 	formats := make([]typst.Format, 0, 3)
-	if s.PDF.Checked {
+	if s.PDF {
 		formats = append(formats, typst.PDF)
 	}
-	if s.PNG.Checked {
+	if s.PNG {
 		formats = append(formats, typst.PNG)
 	}
-	if s.SVG.Checked {
+	if s.SVG {
 		formats = append(formats, typst.SVG)
 	}
 	return app.Options{
-		TemplatePath: s.Template.Text,
-		CSVPath:      s.CSV.Text,
-		MetadataPath: s.Metadata.Text,
-		OutputDir:    s.Output.Text,
+		TemplatePath: s.TemplatePath,
+		CSVPath:      s.CSVPath,
+		MetadataPath: s.MetadataPath,
+		OutputDir:    s.OutputDir,
 		Formats:      formats,
-		TypstBinary:  s.Typst.Text,
+		TypstBinary:  s.TypstBinary,
 	}
 }

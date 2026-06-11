@@ -21,10 +21,12 @@ go run ./cmd/typemerge
 Launch the desktop GUI:
 
 ```bash
-go run ./cmd/typemerge-gui
+wails dev
 ```
 
-Linux GUI builds require Fyne's OpenGL/X11 development dependencies.
+Install the Wails CLI first with
+`go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0`. Linux GUI builds
+require GTK3 and WebKitGTK development packages.
 
 Generated files are written below `out/`.
 

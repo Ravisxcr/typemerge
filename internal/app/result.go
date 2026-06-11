@@ -1,11 +1,11 @@
 package app
 
 type GeneratedFile struct {
-	Record int
-	Format string
-	Path   string
+	Record int    `json:"record"`
+	Format string `json:"format"`
+	Path   string `json:"path"`
 }
 
 type Result struct {
-	Files []GeneratedFile
+	Files []GeneratedFile `json:"files"`
 }

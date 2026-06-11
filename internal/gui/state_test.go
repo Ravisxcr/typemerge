@@ -8,12 +8,12 @@ import (
 
 func TestStateOptions(t *testing.T) {
 	state := NewState()
-	state.Template.SetText("invoice.typ")
-	state.CSV.SetText("data.csv")
-	state.Metadata.SetText("meta.txt")
-	state.Output.SetText("generated")
-	state.PDF.SetChecked(false)
-	state.SVG.SetChecked(true)
+	state.TemplatePath = "invoice.typ"
+	state.CSVPath = "data.csv"
+	state.MetadataPath = "meta.txt"
+	state.OutputDir = "generated"
+	state.PDF = false
+	state.SVG = true
 
 	options := state.Options()
 	if options.TemplatePath != "invoice.typ" || options.OutputDir != "generated" {
