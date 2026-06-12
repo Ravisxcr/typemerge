@@ -1,14 +1,21 @@
 package main
 
 import (
-	"log"
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"os"
 
-	"typemerge/internal/app"
-	"typemerge/internal/gui"
+	"typemerge/internal/cli"
 )
 
 func main() {
-	if err := gui.Run(app.NewService()); err != nil {
-		log.Fatal(err)
+	if err := cli.Run(context.Background(), os.Args[1:], os.Stdout, os.Stderr); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return
+		}
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
 	}
 }

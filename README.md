@@ -18,16 +18,6 @@ Generate PDFs (requires `typst` on `PATH`):
 go run ./cmd/typemerge
 ```
 
-Launch the desktop GUI:
-
-```bash
-wails dev
-```
-
-Install the Wails CLI first with
-`go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0`. Linux GUI builds
-require GTK3 and WebKitGTK development packages.
-
 Generated files are written below `out/`.
 
 ## Inputs
@@ -44,6 +34,6 @@ See [docs/usage.md](docs/usage.md), [docs/templates.md](docs/templates.md), and
 
 ## Architecture
 
-Both executable frontends call `internal/app.Service`. Parsing, rendering,
-naming, filesystem output, and Typst compilation are isolated in their own
-packages. The supported library entrypoint is `pkg/typemerge`.
+The CLI calls `internal/app.Service`. Parsing, rendering, naming, filesystem
+output, and Typst compilation are isolated in their own packages. The supported
+library entrypoint is `pkg/typemerge`.
