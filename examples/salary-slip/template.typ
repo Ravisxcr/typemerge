@@ -1,6 +1,7 @@
 // ------------------------------------------------------------
-//  Salary Slip Template
-//  Usage: typst compile salary_slip.typ
+//  Salary Slip Template (Go text/template + Typst)
+//  Usage: render this file with Go's template engine, then:
+//         typst compile salary_slip.typ
 // ------------------------------------------------------------
 
 // Brand colors. Change these once to rebrand the document.
@@ -132,14 +133,14 @@
   columns: (1fr, 1fr),
   gutter: 12pt,
   detail-card("Employee Details", [
-    #kv("Employee ID", "{{ get .Employee "employee_id" }}")
-    #kv("Full Name", "{{ get .Employee "name" }}")
-    #kv("Designation", "{{ get .Employee "designation" }}")
+    #kv("Employee ID", [{{ get .Employee "employee_id" }}])
+    #kv("Full Name", [{{ get .Employee "name" }}])
+    #kv("Designation", [{{ get .Employee "designation" }}])
   ]),
   detail-card("Payment Details", [
-    #kv("Payment Date", "{{ get .Meta "payment_date" }}")
-    #kv("Pay Period", "{{ get .Meta "month" }} {{ get .Meta "year" }}")
-    #kv("Currency", "{{ get .Meta "currency" }}")
+    #kv("Payment Date", [{{ get .Meta "payment_date" }}])
+    #kv("Pay Period", [{{ get .Meta "month" }} {{ get .Meta "year" }}])
+    #kv("Currency", [{{ get .Meta "currency" }}])
   ]),
 )
 
@@ -171,10 +172,10 @@
   ]
   #line(length: 100%, stroke: 0.5pt + border)
 
-  #slip-row("Basic Salary", "Earning", "{{ money (get .Employee "basic") }}", kind-fill: success)
-  #slip-row("House Rent Allowance", "Earning", "{{ money (get .Employee "hra") }}", kind-fill: success, is-dark: true)
-  #slip-row("Other Allowances", "Earning", "{{ money (get .Employee "allowances") }}", kind-fill: success)
-  #slip-row("Deductions", "Deduction", "{{ money (get .Employee "deductions") }}", kind-fill: danger, is-dark: true)
+  #slip-row("Basic Salary", "Earning", [{{ money (get .Employee "basic") }}], kind-fill: success)
+  #slip-row("House Rent Allowance", "Earning", [{{ money (get .Employee "hra") }}], kind-fill: success, is-dark: true)
+  #slip-row("Other Allowances", "Earning", [{{ money (get .Employee "allowances") }}], kind-fill: success)
+  #slip-row("Deductions", "Deduction", [{{ money (get .Employee "deductions") }}], kind-fill: danger, is-dark: true)
 
   #block(fill: accent, width: 100%)[
     #pad(x: 14pt, y: 8pt)[
@@ -184,7 +185,7 @@
         align: (left, center, right),
         text(size: 10pt, weight: "bold", fill: white)[Net Pay],
         [],
-        amount-style("{{ money (get .Employee "net_pay") }}", fill: white, strong: true),
+        amount-style([{{ money (get .Employee "net_pay") }}], fill: white, strong: true),
       )
     ]
   ]

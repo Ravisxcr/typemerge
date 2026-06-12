@@ -16,6 +16,34 @@ tasks:
     cmds:
       - go run ./cmd/typemerge -formats ""
 
+  examples:
+    desc: Generate all bundled examples
+    deps:
+      - example:salary-slip
+      - example:certificate
+      - example:receipt
+      - example:birthday-invite
+
+  example:salary-slip:
+    desc: Generate the salary-slip example
+    cmds:
+      - go run ./cmd/typemerge -template examples/salary-slip/template.typ -csv examples/salary-slip/data.csv -metadata examples/salary-slip/metadata.txt -out out/salary-slip
+
+  example:certificate:
+    desc: Generate the certificate example
+    cmds:
+      - go run ./cmd/typemerge -template examples/certificate/template.typ -csv examples/certificate/data.csv -metadata examples/certificate/metadata.txt -out out/certificate
+
+  example:receipt:
+    desc: Generate the receipt example
+    cmds:
+      - go run ./cmd/typemerge -template examples/receipt/template.typ -csv examples/receipt/data.csv -metadata examples/receipt/metadata.txt -out out/receipt
+
+  example:birthday-invite:
+    desc: Generate the birthday-invite example
+    cmds:
+      - go run ./cmd/typemerge -template examples/birthday-invite/template.typ -csv examples/birthday-invite/data.csv -metadata examples/birthday-invite/metadata.txt -out out/birthday-invite
+
   fmt:
     desc: Format Go source files
     cmds:

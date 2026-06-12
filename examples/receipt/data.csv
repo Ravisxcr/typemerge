@@ -1,0 +1,4 @@
+id,customer_name,payment_date,payment_method,description,reference,subtotal,tax,total
+RCT-2026-041,Ananya Rao,2026-05-03,UPI,Annual workspace membership,UPI-845210,12000,2160,14160
+RCT-2026-042,Rohan Kapoor,2026-05-04,Credit Card,Design consultation package,CARD-193844,18500,3330,21830
+RCT-2026-043,Sana Mirza,2026-05-06,Bank Transfer,Website maintenance retainer,NEFT-620155,25000,4500,29500

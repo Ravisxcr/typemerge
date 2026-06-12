@@ -1,0 +1,4 @@
+organization=Northstar Learning Institute
+signatory=Dr. Maya Sen
+signatory_title=Program Director
+seal_text=Northstar Certified
