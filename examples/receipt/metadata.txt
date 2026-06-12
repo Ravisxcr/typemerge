@@ -1,0 +1,5 @@
+business_name=Studio Meridian
+address=18 Residency Road, Bengaluru 560025
+contact=hello\@studiomeridian.example | +91 80 5555 0142
+currency=INR
+authorized_by=Finance Desk

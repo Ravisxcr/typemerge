@@ -1,0 +1,2 @@
+host_line=You are invited to a birthday party
+rsvp_contact=Riya: +91 98765 43210

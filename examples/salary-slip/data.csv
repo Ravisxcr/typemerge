@@ -1,0 +1,4 @@
+employee_id,name,designation,basic,hra,allowances,deductions,net_pay
+EMP001,Asha Rao,Software Engineer,47750,19100,8250,3450,71650
+EMP002,Rohan Mehta,Product Designer,50500,20200,9500,3900,76300
+EMP003,Priya Nair,QA Engineer,53250,21300,10750,4350,80950
