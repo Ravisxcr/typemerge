@@ -12,5 +12,7 @@ for target in linux/amd64 linux/arm64 windows/amd64 darwin/amd64 darwin/arm64; d
     suffix=".exe"
   fi
   output="dist/typemerge-${version}-${os}-${arch}${suffix}"
-  GOOS="$os" GOARCH="$arch" go build -trimpath -o "$output" ./cmd/typemerge
+  GOOS="$os" GOARCH="$arch" go build -trimpath \
+    -ldflags "-X typemerge/internal/version.Value=$version" \
+    -o "$output" ./cmd/typemerge
 done

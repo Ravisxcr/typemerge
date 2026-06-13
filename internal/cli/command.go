@@ -9,6 +9,7 @@ import (
 
 	"typemerge/internal/app"
 	"typemerge/internal/typst"
+	"typemerge/internal/version"
 )
 
 func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -16,9 +17,11 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	formatsValue := formatsString(options.Formats)
 	var requiredColumns string
 	var requiredMetadata string
+	var showVersion bool
 
 	flags := flag.NewFlagSet("typemerge", flag.ContinueOnError)
 	flags.SetOutput(stderr)
+	flags.BoolVar(&showVersion, "version", false, "display version information")
 	flags.StringVar(&options.TemplatePath, "template", options.TemplatePath, "Typst template file")
 	flags.StringVar(&options.CSVPath, "csv", options.CSVPath, "CSV data file")
 	flags.StringVar(&options.MetadataPath, "metadata", options.MetadataPath, "key=value metadata file")
@@ -29,6 +32,10 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	flags.StringVar(&requiredMetadata, "require-metadata", "", "comma-separated required metadata keys")
 	if err := flags.Parse(args); err != nil {
 		return err
+	}
+	if showVersion {
+		fmt.Fprintf(stdout, "typemerge %s\n", version.Value)
+		return nil
 	}
 	if flags.NArg() != 0 {
 		return fmt.Errorf("unexpected arguments: %s", strings.Join(flags.Args(), " "))

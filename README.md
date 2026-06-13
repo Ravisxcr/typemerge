@@ -72,6 +72,12 @@ On Windows, use:
 go build -o dist/typemerge.exe ./cmd/typemerge
 ```
 
+Check the installed version:
+
+```sh
+typemerge --version
+```
+
 Example CSV:
 
 ```csv

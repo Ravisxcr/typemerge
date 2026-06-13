@@ -47,6 +47,23 @@ func TestRunRequiresInputPaths(t *testing.T) {
 	}
 }
 
+func TestRunDisplaysVersion(t *testing.T) {
+	for _, flagName := range []string{"-version", "--version"} {
+		t.Run(flagName, func(t *testing.T) {
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+
+			err := Run(context.Background(), []string{flagName}, &stdout, &stderr)
+			if err != nil {
+				t.Fatalf("Run() error = %v, stderr = %s", err, stderr.String())
+			}
+			if stdout.String() != "typemerge dev\n" {
+				t.Fatalf("stdout = %q, want %q", stdout.String(), "typemerge dev\n")
+			}
+		})
+	}
+}
+
 func writeFile(t *testing.T, path, contents string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {

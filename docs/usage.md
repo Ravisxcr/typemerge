@@ -30,6 +30,7 @@ go run ./cmd/typemerge \
 
 | Option | Default | Description |
 | --- | --- | --- |
+| `-version` | `false` | Display the version and exit |
 | `-template` | required | Typst file parsed as a Go template |
 | `-csv` | required | CSV file; each data row creates one document |
 | `-metadata` | required | Shared `key=value` metadata file |
@@ -43,6 +44,12 @@ Display the built-in help:
 
 ```sh
 go run ./cmd/typemerge -h
+```
+
+Display the installed version:
+
+```sh
+typemerge --version
 ```
 
 The `-template`, `-csv`, and `-metadata` paths must be provided explicitly.
