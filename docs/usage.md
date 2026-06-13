@@ -104,16 +104,8 @@ For each CSV row, `typemerge` writes:
 
 Only requested compiled-format directories are created.
 
-The filename is selected from the first non-empty value found in:
-
-1. `employee_id`
-2. `Employee ID`
-3. `id`
-4. `ID`
-5. `name`
-6. `Name`
-7. the first non-empty column when column names are sorted
-8. `record-NNN` when the row has no non-empty values
+The filename uses the first non-empty value after sorting column names. When
+the row has no non-empty values, it uses `record-NNN`.
 
 Names are lowercased and converted to URL-like slugs. For example,
 `Record 001` becomes `record-001`. Repeated names receive `-2`, `-3`, and so

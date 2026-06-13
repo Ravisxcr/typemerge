@@ -12,12 +12,6 @@ import (
 var unsafeName = regexp.MustCompile(`[^a-z0-9]+`)
 
 func Stem(record input.Record, rowNumber int) string {
-	for _, key := range []string{"employee_id", "Employee ID", "id", "ID", "name", "Name"} {
-		if value := strings.TrimSpace(record[key]); value != "" {
-			return Slug(value)
-		}
-	}
-
 	keys := make([]string, 0, len(record))
 	for key := range record {
 		keys = append(keys, key)

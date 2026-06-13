@@ -108,9 +108,8 @@ out/
     record-002.pdf
 ```
 
-Output names prefer the CSV columns `employee_id`, `Employee ID`, `id`, `ID`,
-`name`, or `Name`, in that order. See [CLI usage](docs/usage.md#output-files)
-for the full naming behavior.
+Output names use the first non-empty value after sorting CSV column names.
+See [CLI usage](docs/usage.md#output-files) for the full naming behavior.
 
 ## Documentation
 

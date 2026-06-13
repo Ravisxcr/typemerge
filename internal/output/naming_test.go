@@ -6,9 +6,9 @@ import (
 	"typemerge/internal/input"
 )
 
-func TestStemPrefersEmployeeID(t *testing.T) {
-	record := input.Record{"employee_id": "EMP 001", "name": "Ada Lovelace"}
-	if got := Stem(record, 1); got != "emp-001" {
+func TestStemUsesFirstNonEmptyValueBySortedColumnName(t *testing.T) {
+	record := input.Record{"id": "42", "account": "Primary", "blank": " "}
+	if got := Stem(record, 1); got != "primary" {
 		t.Fatalf("Stem() = %q", got)
 	}
 }
