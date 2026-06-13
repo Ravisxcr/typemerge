@@ -56,7 +56,7 @@
   [
     #text(size: 8pt, fill: muted)[RECEIPT NO.]
     #linebreak()
-    #text(size: 9pt, weight: "bold")[{{ get .Employee "id" }}]
+    #text(size: 9pt, weight: "bold")[{{ get .Record "id" }}]
   ],
 )
 
@@ -68,11 +68,11 @@
   radius: 5pt,
   inset: 9pt,
 )[
-  #row("Received from", "{{ get .Employee "customer_name" }}", strong: true)
+  #row("Received from", "{{ get .Record "customer_name" }}", strong: true)
   #v(5pt)
-  #row("Date", "{{ date "January 2, 2006" (get .Employee "payment_date") }}")
+  #row("Date", "{{ date "January 2, 2006" (get .Record "payment_date") }}")
   #v(5pt)
-  #row("Payment method", "{{ get .Employee "payment_method" }}")
+  #row("Payment method", "{{ get .Record "payment_method" }}")
 ]
 
 #v(11pt)
@@ -80,13 +80,13 @@
 #v(5pt)
 #line(length: 100%, stroke: 0.6pt + border)
 #v(7pt)
-#row("Description", "{{ get .Employee "description" }}")
+#row("Description", "{{ get .Record "description" }}")
 #v(7pt)
-#row("Reference", "{{ get .Employee "reference" }}")
+#row("Reference", "{{ get .Record "reference" }}")
 #v(7pt)
-#row("Subtotal", "{{ money (get .Employee "subtotal") }}")
+#row("Subtotal", "{{ money (get .Record "subtotal") }}")
 #v(7pt)
-#row("Tax", "{{ money (get .Employee "tax") }}")
+#row("Tax", "{{ money (get .Record "tax") }}")
 #v(7pt)
 #line(length: 100%, stroke: 0.6pt + border)
 #v(8pt)
@@ -101,7 +101,7 @@
     columns: (1fr, auto),
     text(size: 10pt, weight: "bold", fill: white)[TOTAL PAID],
     text(size: 15pt, weight: "bold", fill: white)[
-      {{ get .Meta "currency" }} {{ money (get .Employee "total") }}
+      {{ get .Meta "currency" }} {{ money (get .Record "total") }}
     ],
   )
 ]

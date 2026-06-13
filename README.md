@@ -90,7 +90,7 @@ generated_on=2026-06-12
 Inside the template, read CSV and metadata values with:
 
 ```gotemplate
-{{ get .Employee "title" }}
+{{ get .Record "title" }}
 {{ get .Meta "document_type" }}
 ```
 

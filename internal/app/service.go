@@ -72,7 +72,7 @@ func (s *Service) Generate(ctx context.Context, options Options) (Result, error)
 
 		stem := uniqueStem(output.Stem(record, index+1), usedStems)
 		typPath := filepath.Join(paths.Typ, stem+".typ")
-		contents, err := renderer.Render(render.Data{Employee: record, Meta: meta})
+		contents, err := renderer.Render(render.Data{Record: record, Meta: meta})
 		if err != nil {
 			return result, fmt.Errorf("render record %d: %w", index+1, err)
 		}

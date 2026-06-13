@@ -17,7 +17,7 @@ func TestGenerateTypFiles(t *testing.T) {
 	csvPath := filepath.Join(root, "data.csv")
 	metadataPath := filepath.Join(root, "metadata.txt")
 
-	writeTestFile(t, templatePath, `Hello {{ get .Employee "name" }} from {{ get .Meta "company" }}`)
+	writeTestFile(t, templatePath, `Hello {{ get .Record "name" }} from {{ get .Meta "company" }}`)
 	writeTestFile(t, csvPath, "employee_id,name\nEMP 1,Ada\nEMP 1,Grace\n")
 	writeTestFile(t, metadataPath, "company=Acme\n")
 
@@ -52,7 +52,7 @@ func TestGenerateCompiledFiles(t *testing.T) {
 	csvPath := filepath.Join(root, "data.csv")
 	metadataPath := filepath.Join(root, "metadata.txt")
 
-	writeTestFile(t, templatePath, `Hello {{ get .Employee "name" }}`)
+	writeTestFile(t, templatePath, `Hello {{ get .Record "name" }}`)
 	writeTestFile(t, csvPath, "id,name\n1,Ada\n")
 	writeTestFile(t, metadataPath, "company=Acme\n")
 
@@ -93,7 +93,7 @@ func TestGenerateWritesAllTypFilesBeforeFindingCompiler(t *testing.T) {
 	metadataPath := filepath.Join(root, "metadata.txt")
 	outputPath := filepath.Join(root, "out")
 
-	writeTestFile(t, templatePath, `Hello {{ get .Employee "name" }}`)
+	writeTestFile(t, templatePath, `Hello {{ get .Record "name" }}`)
 	writeTestFile(t, csvPath, "id,name\n1,Ada\n2,Grace\n")
 	writeTestFile(t, metadataPath, "company=Acme\n")
 

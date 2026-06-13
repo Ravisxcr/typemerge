@@ -42,13 +42,13 @@
       #v(7pt)
 
       #text(size: 32pt, style: "italic", fill: purple)[
-        {{ get .Employee "celebrant_name" }}
+        {{ get .Record "celebrant_name" }}
       ]
       #v(5pt)
       #text(size: 13pt, fill: pink)[is turning]
       #v(3pt)
       #text(size: 34pt, weight: "bold", fill: purple)[
-        {{ get .Employee "age" }}
+        {{ get .Record "age" }}
       ]
 
       #v(12pt)
@@ -56,16 +56,16 @@
       #v(12pt)
 
       #text(size: 17pt, weight: "bold", fill: purple)[
-        {{ date "Monday, January 2, 2006" (get .Employee "birthday_date") }}
+        {{ date "Monday, January 2, 2006" (get .Record "birthday_date") }}
       ]
       #v(5pt)
-      #text(size: 12pt)[at {{ get .Employee "party_time" }}]
+      #text(size: 12pt)[at {{ get .Record "party_time" }}]
       #v(11pt)
 
-      #text(size: 12pt, weight: "bold")[{{ get .Employee "venue_name" }}]
+      #text(size: 12pt, weight: "bold")[{{ get .Record "venue_name" }}]
       #v(3pt)
       #block(width: 78%)[
-        #text(size: 9pt, fill: muted)[{{ get .Employee "venue_address" }}]
+        #text(size: 9pt, fill: muted)[{{ get .Record "venue_address" }}]
       ]
 
       #v(12pt)
@@ -79,15 +79,15 @@
         #text(size: 8pt, fill: muted)[PARTY PLANS]
         #v(3pt)
         #text(size: 10pt, weight: "bold")[
-          {{ get .Employee "party_details" }}
+          {{ get .Record "party_details" }}
         ]
       ]
 
       #v(1fr)
-      #text(size: 9pt, style: "italic", fill: muted)[{{ get .Employee "note" }}]
+      #text(size: 9pt, style: "italic", fill: muted)[{{ get .Record "note" }}]
       #v(9pt)
       #text(size: 8pt, weight: "bold", tracking: 1pt, fill: purple)[
-        RSVP BY {{ upper (date "January 2" (get .Employee "rsvp_date")) }}
+        RSVP BY {{ upper (date "January 2" (get .Record "rsvp_date")) }}
       ]
       #v(3pt)
       #text(size: 8pt, fill: muted)[{{ get .Meta "rsvp_contact" }}]

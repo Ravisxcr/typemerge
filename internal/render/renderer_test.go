@@ -8,14 +8,14 @@ import (
 )
 
 func TestRendererUsesTemplateFunctions(t *testing.T) {
-	renderer, err := Parse("test", `{{ initial (get .Meta "company") }} {{ upper (get .Employee "name") }} {{ money "" }}`)
+	renderer, err := Parse("test", `{{ initial (get .Meta "company") }} {{ upper (get .Record "name") }} {{ money "" }}`)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	rendered, err := renderer.Render(Data{
-		Employee: input.Record{"name": "Ada"},
-		Meta:     map[string]string{"company": "example"},
+		Record: input.Record{"name": "Ada"},
+		Meta:   map[string]string{"company": "example"},
 	})
 	if err != nil {
 		t.Fatal(err)

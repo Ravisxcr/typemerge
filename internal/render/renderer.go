@@ -11,8 +11,8 @@ import (
 )
 
 type Data struct {
-	Employee input.Record
-	Meta     map[string]string
+	Record input.Record
+	Meta   map[string]string
 }
 
 type Renderer struct {

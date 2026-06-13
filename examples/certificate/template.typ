@@ -41,7 +41,7 @@
       #v(15pt)
 
       #text(size: 29pt, style: "italic", fill: gold)[
-        {{ get .Employee "recipient_name" }}
+        {{ get .Record "recipient_name" }}
       ]
       #v(5pt)
       #line(length: 58%, stroke: 0.7pt + gold)
@@ -49,10 +49,10 @@
 
       #text(size: 12pt, fill: muted)[for successfully completing]
       #v(8pt)
-      #text(size: 19pt, weight: "bold")[{{ get .Employee "achievement" }}]
+      #text(size: 19pt, weight: "bold")[{{ get .Record "achievement" }}]
       #v(9pt)
       #block(width: 75%)[
-        #text(size: 10.5pt, fill: muted)[{{ get .Employee "citation" }}]
+        #text(size: 10.5pt, fill: muted)[{{ get .Record "citation" }}]
       ]
       #v(18pt)
 
@@ -61,7 +61,7 @@
         gutter: 32pt,
         align: center,
         [
-          #text(size: 11pt, weight: "bold")[{{ date "January 2, 2006" (get .Employee "issue_date") }}]
+          #text(size: 11pt, weight: "bold")[{{ date "January 2, 2006" (get .Record "issue_date") }}]
           #v(5pt)
           #line(length: 100%, stroke: 0.6pt + navy)
           #v(4pt)
@@ -89,7 +89,7 @@
         ],
       )
       #v(10pt)
-      #text(size: 8pt, fill: muted)[Certificate ID: {{ get .Employee "id" }}]
+      #text(size: 8pt, fill: muted)[Certificate ID: {{ get .Record "id" }}]
     ]
   ]
 ]

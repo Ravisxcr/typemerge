@@ -133,9 +133,9 @@
   columns: (1fr, 1fr),
   gutter: 12pt,
   detail-card("Employee Details", [
-    #kv("Employee ID", [{{ get .Employee "employee_id" }}])
-    #kv("Full Name", [{{ get .Employee "name" }}])
-    #kv("Designation", [{{ get .Employee "designation" }}])
+    #kv("Employee ID", [{{ get .Record "employee_id" }}])
+    #kv("Full Name", [{{ get .Record "name" }}])
+    #kv("Designation", [{{ get .Record "designation" }}])
   ]),
   detail-card("Payment Details", [
     #kv("Payment Date", [{{ get .Meta "payment_date" }}])
@@ -172,10 +172,10 @@
   ]
   #line(length: 100%, stroke: 0.5pt + border)
 
-  #slip-row("Basic Salary", "Earning", [{{ money (get .Employee "basic") }}], kind-fill: success)
-  #slip-row("House Rent Allowance", "Earning", [{{ money (get .Employee "hra") }}], kind-fill: success, is-dark: true)
-  #slip-row("Other Allowances", "Earning", [{{ money (get .Employee "allowances") }}], kind-fill: success)
-  #slip-row("Deductions", "Deduction", [{{ money (get .Employee "deductions") }}], kind-fill: danger, is-dark: true)
+  #slip-row("Basic Salary", "Earning", [{{ money (get .Record "basic") }}], kind-fill: success)
+  #slip-row("House Rent Allowance", "Earning", [{{ money (get .Record "hra") }}], kind-fill: success, is-dark: true)
+  #slip-row("Other Allowances", "Earning", [{{ money (get .Record "allowances") }}], kind-fill: success)
+  #slip-row("Deductions", "Deduction", [{{ money (get .Record "deductions") }}], kind-fill: danger, is-dark: true)
 
   #block(fill: accent, width: 100%)[
     #pad(x: 14pt, y: 8pt)[
@@ -185,7 +185,7 @@
         align: (left, center, right),
         text(size: 10pt, weight: "bold", fill: white)[Net Pay],
         [],
-        amount-style([{{ money (get .Employee "net_pay") }}], fill: white, strong: true),
+        amount-style([{{ money (get .Record "net_pay") }}], fill: white, strong: true),
       )
     ]
   ]
@@ -209,7 +209,7 @@
       dir: ttb,
       spacing: 2pt,
       text(size: 7pt, fill: muted, weight: "bold", tracking: 0.8pt)[TOTAL NET PAY],
-      text(size: 15pt, fill: ink, weight: "bold")[{{ money (get .Employee "net_pay") }}],
+      text(size: 15pt, fill: ink, weight: "bold")[{{ money (get .Record "net_pay") }}],
     ),
   )
 ]

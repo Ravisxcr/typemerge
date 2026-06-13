@@ -16,7 +16,7 @@ func TestRunGeneratesTypOnly(t *testing.T) {
 	metadataPath := filepath.Join(root, "metadata.txt")
 	outputPath := filepath.Join(root, "out")
 
-	writeFile(t, templatePath, `Hello {{ get .Employee "name" }}`)
+	writeFile(t, templatePath, `Hello {{ get .Record "name" }}`)
 	writeFile(t, csvPath, "id,name\n1,Ada\n")
 	writeFile(t, metadataPath, "company=Acme\n")
 
