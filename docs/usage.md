@@ -30,9 +30,9 @@ go run ./cmd/typemerge \
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `-template` | built-in sample path | Typst file parsed as a Go template |
-| `-csv` | built-in sample path | CSV file; each data row creates one document |
-| `-metadata` | built-in sample path | Shared `key=value` metadata file |
+| `-template` | required | Typst file parsed as a Go template |
+| `-csv` | required | CSV file; each data row creates one document |
+| `-metadata` | required | Shared `key=value` metadata file |
 | `-out` | `out` | Root directory for generated files |
 | `-formats` | `pdf` | Comma-separated `pdf`, `png`, and/or `svg`; empty means `.typ` only |
 | `-typst` | `typst` | Typst executable name or full path |
@@ -45,8 +45,7 @@ Display the built-in help:
 go run ./cmd/typemerge -h
 ```
 
-For reusable commands, specify `-template`, `-csv`, and `-metadata` rather than
-relying on the sample-oriented defaults.
+The `-template`, `-csv`, and `-metadata` paths must be provided explicitly.
 
 Format names are case-insensitive, surrounding whitespace is ignored, and
 duplicates are removed. Unsupported formats cause an error.

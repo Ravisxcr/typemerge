@@ -37,6 +37,16 @@ func TestRunGeneratesTypOnly(t *testing.T) {
 	}
 }
 
+func TestRunRequiresInputPaths(t *testing.T) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	err := Run(context.Background(), nil, &stdout, &stderr)
+	if err == nil || err.Error() != "template path is required" {
+		t.Fatalf("Run() error = %v, want template path is required", err)
+	}
+}
+
 func writeFile(t *testing.T, path, contents string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {

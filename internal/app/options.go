@@ -15,11 +15,8 @@ type Options struct {
 
 func DefaultOptions() Options {
 	return Options{
-		TemplatePath: "examples/salary-slip/template.typ",
-		CSVPath:      "examples/salary-slip/data.csv",
-		MetadataPath: "examples/salary-slip/metadata.txt",
-		OutputDir:    "out",
-		Formats:      []typst.Format{typst.PDF},
-		TypstBinary:  "typst",
+		OutputDir:   "out",
+		Formats:     []typst.Format{typst.PDF},
+		TypstBinary: "typst",
 	}
 }
