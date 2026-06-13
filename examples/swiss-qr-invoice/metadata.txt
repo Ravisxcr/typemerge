@@ -1,0 +1,9 @@
+company_name=Helvetic Digital AG
+creditor_street=Bahnhofstrasse
+creditor_building=45
+creditor_postal_code=8001
+creditor_city=Zurich
+creditor_country=CH
+company_email=billing\@helvetic-digital.example
+account=CH5800791123000889012
+currency=CHF

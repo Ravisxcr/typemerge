@@ -23,6 +23,7 @@ tasks:
       - example:certificate
       - example:receipt
       - example:birthday-invite
+      - example:swiss-qr-invoice
 
   example:salary-slip:
     desc: Generate the salary-slip example
@@ -43,6 +44,11 @@ tasks:
     desc: Generate the birthday-invite example
     cmds:
       - go run ./cmd/typemerge -template examples/birthday-invite/template.typ -csv examples/birthday-invite/data.csv -metadata examples/birthday-invite/metadata.txt -out out/birthday-invite
+
+  example:swiss-qr-invoice:
+    desc: Generate the Swiss QR invoice example
+    cmds:
+      - go run ./cmd/typemerge -template examples/swiss-qr-invoice/template.typ -csv examples/swiss-qr-invoice/data.csv -metadata examples/swiss-qr-invoice/metadata.txt -out out/swiss-qr-invoice
 
   fmt:
     desc: Format Go source files
